@@ -1,3 +1,4 @@
+import io
 import os
 import sys
 
@@ -37,8 +38,8 @@ class TTS:
                 print("Estimated audio duration is " + str(int(value) / self._sample_rate) + " seconds")
                 break
 
-        output_filename = "tmp.opus"
-        ogg_opus_writer = pyogg.OggOpusWriter(output_filename)
+        f = io.BytesIO()
+        ogg_opus_writer = pyogg.OggOpusWriter(f)
         ogg_opus_writer.set_application("audio")
         ogg_opus_writer.set_sampling_frequency(self._sample_rate)
         ogg_opus_writer.set_channels(1)
@@ -46,11 +47,11 @@ class TTS:
         for stream_response in responses:
             ogg_opus_writer.encode(stream_response.audio_chunk)
 
-        # We've finished writing the file
+        # close writer
         ogg_opus_writer.close()
 
-        with open(output_filename):
-            audio = open(output_filename, 'rb')
-        os.remove(output_filename)
+        # get audio
+        f.seek(0)
+        audio = f.getvalue()
 
         return audio
