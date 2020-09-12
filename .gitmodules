@@ -1,0 +1,3 @@
+[submodule "voicekit-examples"]
+	path = voicekit-examples
+	url = https://github.com/TinkoffCreditSystems/voicekit-examples
