@@ -4,3 +4,8 @@ telegram:
 chitchat:
   domain: ${env CHITCHAT_DOMAIN | val "chitchat-vc.tinkoff.ru"}
   secret_key: ${env CHITCHAT_SECRET_KEY | val null}
+
+voice_kit:
+  endpoint: ${env VOICEKIT_ENDPOINT | val null}
+  api_key: ${env VOICEKIT_API_KEY | val null}
+  secret_key: ${env VOICEKIT_SECRET_KEY | val null}
