@@ -27,7 +27,7 @@ class TTS:
             ),
         )
 
-    def audio2text(self, text):
+    def text2audio(self, text):
         stub = tts_pb2_grpc.TextToSpeechStub(grpc.secure_channel(self._endpoint, grpc.ssl_channel_credentials()))
         request = self._build_request(text)
         metadata = authorization_metadata(self._api_key, self._secret_key, "tinkoff.cloud.tts")

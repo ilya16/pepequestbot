@@ -63,7 +63,7 @@ def run_bot(config: granula.Config):
 
             _send(message, response=response_text)
 
-            data = tts.audio2text(response_text)
+            data = tts.text2audio(response_text)
             message = _send_voice(message, voice=data)
             print(message.voice.file_id)
 
