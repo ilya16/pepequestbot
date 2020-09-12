@@ -8,6 +8,10 @@ import requests
 import telebot
 import granula
 
+import sys
+import os
+sys.path.append(os.path.abspath("."))
+
 from tts import TTS
 from hackabot.common import CONFIG_PATH, Context
 from hackabot.state_machine import get_state_machine, StateMachine
