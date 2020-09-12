@@ -1,0 +1,6 @@
+telegram:
+  key: ${env TELEGRAM_BOT_KEY | val null}
+
+chitchat:
+  domain: ${env CHITCHAT_DOMAIN | val "chitchat-vc.tinkoff.ru"}
+  secret_key: ${env CHITCHAT_SECRET_KEY | val null}

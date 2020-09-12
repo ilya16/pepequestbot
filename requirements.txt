@@ -1,0 +1,6 @@
+pyTelegramBotAPI==3.7.3
+granula
+lazy
+dataclasses
+hypothesis
+pytest
