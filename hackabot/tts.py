@@ -4,7 +4,7 @@ import sys
 
 import pyogg
 
-sys.path.append(os.path.abspath("../voicekit-examples/python"))
+sys.path.append(os.path.abspath("voicekit-examples/python"))
 
 from tinkoff.cloud.tts.v1 import tts_pb2_grpc, tts_pb2
 from auth import authorization_metadata
