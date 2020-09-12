@@ -10,6 +10,9 @@ import granula
 
 import sys
 import os
+
+from hackabot.storage import GameStorage
+
 sys.path.append(os.path.abspath("."))
 
 from tts import TTS
@@ -33,6 +36,7 @@ def run_bot(config: granula.Config):
     bot = telebot.TeleBot(token=config.telegram.key)
     state_machine: StateMachine = get_state_machine(config)
     tts = TTS(config=config['voice_kit'])
+    game_storage = GameStorage(config=config['storage'])
 
     def _send(message: telebot.types.Message, response: str):
         return bot.send_message(chat_id=message.chat.id, text=response, parse_mode='html')
@@ -44,11 +48,6 @@ def run_bot(config: granula.Config):
     def _start(message: telebot.types.Message):
         with locks[message.chat.id]:
             _send(message, response='Привествую тебя. Нажми /start_quest :)')
-
-    # @bot.message_handler(commands=['start_quest'])
-    # def _start_quest(message: telebot.types.Message):
-    #     with locks[message.chat.id]:
-    #         _send(message, response='Задавайте ваши вопросы')
 
     def _send_response(message: telebot.types.Message):
         chat_id = message.chat.id
