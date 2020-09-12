@@ -49,4 +49,8 @@ class TTS:
         # We've finished writing the file
         ogg_opus_writer.close()
 
-        return output_filename
+        with open(output_filename):
+            audio = open(output_filename, 'rb')
+        os.remove(output_filename)
+
+        return audio

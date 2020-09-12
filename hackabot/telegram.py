@@ -1,6 +1,5 @@
 import collections
 import logging
-import os
 import threading
 from threading import Lock
 from typing import Any, DefaultDict
@@ -64,10 +63,9 @@ def run_bot(config: granula.Config):
 
             _send(message, response=response_text)
 
-            path = tts.audio2text(response_text)
-            message = _send_voice(message, voice=open(path, 'rb'))
+            data = tts.audio2text(response_text)
+            message = _send_voice(message, voice=data)
             print(message.voice.file_id)
-            os.remove(path)
 
     @bot.message_handler()
     def send_response(message: telebot.types.Message):  # pylint:disable=unused-variable
