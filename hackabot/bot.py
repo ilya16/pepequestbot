@@ -1,6 +1,7 @@
 import collections
 import logging
 import os
+import random
 import sys
 import threading
 import time
@@ -12,6 +13,7 @@ import telebot
 from telebot import types
 
 from hackabot.common.entities import States, UserInfo
+from hackabot.quiz import Quizes
 from hackabot.storage import GameStorage
 
 sys.path.append(os.path.abspath("."))
@@ -29,75 +31,8 @@ config = granula.Config.from_path(CONFIG_PATH.absolute())
 bot = telebot.TeleBot(token=config.telegram.key)
 tts = TTS(config=config.voice_kit)
 state_machine: StateMachine = get_state_machine(config)
-locks: DefaultDict[Any, Lock] = collections.defaultdict(threading.Lock)
-
 game_storage = GameStorage(config=config.storage)
-
-Quiz = [
-    ("Какую долю ваших расходов за месяц занимает косметика?",
-     ["10% (5000 ₽)",
-      "5% (2500 ₽)",
-      "21% (10500 ₽)",
-      "13% (6500 ₽)"],
-     0),
-    ("Назовите максимальную сумму, которую Вы тратили за раз в одном из магазинов:",
-     ["15200 ₽",
-      "3840 ₽",
-      "7340 ₽",
-      "2710 ₽"],
-     0),
-    ("На какую категорию товаров Вы потратили больше всего в прошлом месяце:",
-     ["кино",
-      "фаст фуд",
-      "супермаркеты",
-      "искусство"],
-     2),
-    ("Если ваша цель — просто сохранить свои деньги, оптимальной стратегией будет:",
-     ["Хранить деньги под матрасом",
-      "Инвестировать в акции/облигации",
-      "Положить деньги в банк под стандартный процент",
-      "Часть держать на вкладах, часть — в инвестициях."],
-     2),
-    ("Что из перечисленного нельзя купить на бирже?",
-     ["акции",
-      "зерно",
-      "автомобиль",
-      "нефть"],
-     2),
-    ("Правила минимизации валютных рисков заключается в том, чтобы брать кредиты:",
-     ["в рублях",
-      "в долларах",
-      "в рублях и долларах",
-      "в той валюте в которой совершается большая часть расходов и получаются доходы"],
-     3),
-    ("Предположим, вы положили 10 000 рублей на вклад под 5% годовых. "
-     "Какая сумма будет на этом вкладе через 10 лет?",
-     ["10 000 * (1+10*0,05)",
-      "10 000 * (1+0,05)^10",
-      "10 000 * 1,05 * 10",
-      "10 000 * 10 / 1,05"],
-     1),
-    ("Допустим, вы положили 100 000 рублей под 5% годовых на один год. "
-     "Инфляция за это время составила 3%. Сколько вы заработали на самом деле?",
-     ["Всё просто, 100 000 * 1,05!",
-      "100 000 * 1,03",
-      "100 000 * (1,05-1,03)",
-      "100 000 * 1,05 * 0,97"],
-     2),
-    ("Вы положили 50 000 рублей под 4% годовых на три года. "
-     "В первый год инфляция составила 2,2%, во второй — 6%, в третий — 3,9%. "
-     "Выгодным ли отказался вклад?",
-     ["Да",
-      "Нет"],
-     1),
-]
-
-
-# print(Quiz[0])
-# question, options, correct_option_id = Quiz[0]
-# bot.send_poll(chat_id, question=question, options=options,
-#               is_anonymous=False, type='quiz',
-#               correct_option_id=correct_option_id, open_period=30)
+locks: DefaultDict[Any, Lock] = collections.defaultdict(threading.Lock)
 
 
 def get_user(user_json):
@@ -155,6 +90,17 @@ def _send_balance(message, balance=0.):
 def balance(message):
     user = get_user(message.from_user)
     _send_balance(message, balance=user.balance)
+
+
+@bot.message_handler(commands=['quiz'])
+def balance(message):
+    quiz_id = random.randint(0, len(Quizes) - 1)
+    question, options, correct_option_id = Quizes[quiz_id]
+
+    _send_voice(message, voice=tts.text2audio('Вот тебе квиз от Олега :)'))
+    bot.send_poll(message.chat.id, question=question, options=options,
+                  is_anonymous=False, type='quiz',
+                  correct_option_id=correct_option_id, open_period=30)
 
 
 @bot.message_handler(commands=['next'])
@@ -229,7 +175,8 @@ def final(message):
     user = get_user(message.chat)
     bot.send_message(message.chat.id, text='*Конец.*', parse_mode='Markdown')
     _send_voice(message, voice=tts.text2audio(
-        'Поздравляем! Вы успешно завершили текущий квест и помогли Олегу увеличить его капитал.'))
+        f'Поздравляем! Вы успешно завершили текущий квест и помогли Олегу '
+        f'{"увеличить" if user.balance >= 5000 else "уменьшить"} его капитал.'))
     _send_balance(message, balance=user.balance)
     _send_voice(message, voice=tts.text2audio(
         'Олег ждёт вас на следующем квесте через неделю :)'))
