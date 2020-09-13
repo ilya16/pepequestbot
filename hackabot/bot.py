@@ -254,97 +254,97 @@ def callback(call):
     user = get_user(call.message.chat)
 
     if call.data == "yes_help":
-        _send_voice(call.message, text='Вам это зачтется :)')
-        _send_voice(call.message, text='Сколько раз в неделю вы бы хотели с ним связываться?')
+        _send_voice(call.message.chat.id, text='Вам это зачтется :)')
+        _send_voice(call.message.chat.id, text='Сколько раз в неделю вы бы хотели с ним связываться?')
         bot.register_next_step_handler(call.message, get_time)
     elif call.data == "no_help":
-        _send_voice(call.message, text='Ваш баланс счета опустел :)')
-        _send_voice(call.message, text='Попробуйте с самого начала')
+        _send_voice(call.message.chat.id, text='Ваш баланс счета опустел :)')
+        _send_voice(call.message.chat.id, text='Попробуйте с самого начала')
         user.balance = 0
     elif call.data == "yes_first":
         bot.send_message(call.message.chat.id, 'Какую сумму вложить в акции этой компании?')
         bot.register_next_step_handler(call.message, get_investment_first_year)
     elif call.data == "no_first":
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'Описанная выше компания - МММ — крупнейшая в истории России финансовая пирамида. По оценкам экспертов, '
             'от МММ пострадало около 10 миллионов человек, общий ущерб населению составляет 110 млн долларов.'))
         time.sleep(6)
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'Благодаря Вам Олег не вложился в МММ и сохранил свои деньги, вместо этого он вложился в акции Газпрома ('
             '2000 долларов) и за 5 лет заработал еще 5000 долларов.'))
         user.balance += 5000
         _send_balance(call.message, balance=user.balance)
         _send(call.message, response='Для продолжения игры отправьте /next')
     elif call.data == "yes_second":
-        _send_voice(call.message, text='Первая компания - Yahoo. Вторая - Яндекс.')
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text='Первая компания - Yahoo. Вторая - Яндекс.')
+        _send_voice(call.message.chat.id, text=(
             'Поисковая система «Яндекс» является четвёртой среди поисковых систем мира по количеству обрабатываемых '
             'поисковых запросов.'))
-        _send_voice(call.message,
+        _send_voice(call.message.chat.id,
                     text='Yahoo все еще не восстановилась после кризиса 2000-2001 годов.')
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'Вложившись в Yahoo, Олег к 2003 году потеряет половину от вложенной суммы, и, разочаровавшись в компании '
             'продаст их акции.'))
         user.balance /= 2
         _send_balance(call.message, balance=user.balance)
         _send(call.message, response='Для продолжения игры отправьте /next')
     elif call.data == "no_second":
-        _send_voice(call.message, text='Первая компания - Yahoo. Вторая - Яндекс.')
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text='Первая компания - Yahoo. Вторая - Яндекс.')
+        _send_voice(call.message.chat.id, text=(
             'Поисковая система «Яндекс» является четвёртой среди поисковых систем мира по количеству обрабатываемых '
             'поисковых запросов.'))
-        _send_voice(call.message,
+        _send_voice(call.message.chat.id,
                     text='Yahoo все еще не восстановилась после кризиса 2000-2001 годов.')
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'Вложившись в Yandex, Олег не прогадал. На настоящий момент он значительно приумножил свое состояние '
             'благодаря вашей помощи и пока хранит эти акции у себя на балансе в банке Тинькофф ; )'))
         user.balance *= 5
         _send_balance(call.message, balance=user.balance)
         _send(call.message, response='Для продолжения игры отправьте /next')
     elif call.data == "yes_third":
-        _send_voice(call.message, text='Олегу повезло, компьютерные клубы стали очень популярны')
-        _send_voice(call.message, text='Его затраты окупились через 4 месяца.')
-        _send_voice(call.message, text=' За те несколько лет, в которые данный бизнес был успешен.')
-        _send_voice(call.message, text='Олег смог заработать 40000 долларов.')
+        _send_voice(call.message.chat.id, text='Олегу повезло, компьютерные клубы стали очень популярны')
+        _send_voice(call.message.chat.id, text='Его затраты окупились через 4 месяца.')
+        _send_voice(call.message.chat.id, text=' За те несколько лет, в которые данный бизнес был успешен.')
+        _send_voice(call.message.chat.id, text='Олег смог заработать 40000 долларов.')
         user.balance += 40000
         _send_balance(call.message, balance=user.balance)
         _send(call.message, response='Для продолжения игры отправьте /next')
     elif call.data == "no_third":
-        _send_voice(call.message, text='Олег упустил неплохую возможность заработать.')
+        _send_voice(call.message.chat.id, text='Олег упустил неплохую возможность заработать.')
         _send_balance(call.message, balance=user.balance)
         _send(call.message, response='Для продолжения игры отправьте /next')
     elif call.data == "yes_fourth":
-        _send_voice(call.message, text='Недостаточная устойчивость российской экономики')
-        _send_voice(call.message, text='как правило, порождает в отношении рубля')
-        _send_voice(call.message,
+        _send_voice(call.message.chat.id, text='Недостаточная устойчивость российской экономики')
+        _send_voice(call.message.chat.id, text='как правило, порождает в отношении рубля')
+        _send_voice(call.message.chat.id,
                     text='не такие оптимистичные, как в отношении доллара, инфляционные ожидания.')
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'Так как прибыль Олега от кафе будет исчисляться в рублях, то кредит ему тоже следует брать в рублях'))
-        _send_voice(call.message,
+        _send_voice(call.message.chat.id,
                     text='с целью минимизации рисков в случае внезапно большой инфляции.')
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'Олегу, не повезло: в 2014 году курс доллара вырос с 35 рублей за доллар до 65.'))
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'К счастью, наш герой оказался грамотным руководителем, его кафе пользовалось спросом и окупилось за 7 лет.'))
-        _send_voice(call.message, text='Хотя если бы он взял кредит в рублях - окупилось бы за 5 лет.')
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text='Хотя если бы он взял кредит в рублях - окупилось бы за 5 лет.')
+        _send_voice(call.message.chat.id, text=(
             'Таким образом, спустя три года чистая прибыль с него составила 30000 долларов.'))
         user.balance += 30000
         final(call.message)
     elif call.data == "no_fourth":
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'Недостаточная устойчивость российской экономики, как правило, порождает в отношении рубля'))
-        _send_voice(call.message,
+        _send_voice(call.message.chat.id,
                     text='не такие оптимистичные, как в отношении доллара, инфляционные ожидания.')
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'Так как прибыль Олега от кафе будет исчисляться в рублях, то кредит ему тоже следует брать в рублях'))
-        _send_voice(call.message,
+        _send_voice(call.message.chat.id,
                     text='с целью минимизации рисков в случае внезапно большой инфляции.')
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'Благодаря Вам кафе Олега окупилось на два года раньше (в сравнении с версией Олега взявшего валютный кредит)'))
-        _send_voice(call.message,
+        _send_voice(call.message.chat.id,
                     text='ведь в 2014 году курс доллара вырос с 35 рублей за доллар до 65.')
-        _send_voice(call.message, text=(
+        _send_voice(call.message.chat.id, text=(
             'Олег выплатил кредит в 2015 году и спустя пять лет чистая прибыль с него составила 50000 долларов'))
         user.balance += 50000
         final(call.message)
