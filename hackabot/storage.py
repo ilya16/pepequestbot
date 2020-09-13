@@ -13,9 +13,9 @@ class BaseStorage:
 
     def get(self, key):
         with shelve.open(self._path) as storage:
-            if str(key) in storage:
+            try:
                 return storage[str(key)]
-            else:
+            except KeyError:
                 return None
 
     def delete(self, key):
@@ -32,7 +32,7 @@ class GameStorage(BaseStorage):
         self.set(key=user.user_id, value=user)
 
     def get_user_info(self, user_id: int):
-        self.get(key=user_id)
+        return self.get(key=user_id)
 
     def delete_user_info(self, user_id):
         self.delete(key=user_id)

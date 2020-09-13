@@ -1,5 +1,16 @@
 import dataclasses
 from typing import Optional
+import enum
+
+
+class States(enum.Enum):
+    start = 0
+    first_year = 1
+    second_year = 2
+    third_year = 3
+    forth_year = 4
+    quiz = 5
+
 
 Ability = str
 Step = int
@@ -24,9 +35,14 @@ class State:
     step: Optional[Step]
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass()
 class UserInfo:
     user_id: str
-    state: State
-    balance: Balance
+    username: str = ''
+    first_name: str = ''
+    last_name: str = ''
+    state: int = -1
+    age: int = -1
+    balance: Balance = 0
+    frequency: int = -1
 

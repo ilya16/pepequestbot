@@ -64,11 +64,24 @@ def run_bot(config: granula.Config):
                 logger.exception(e)
                 response_text = 'Произошла ошибка'
 
-            _send(message, response=response_text)
+            # _send(message, response=response_text)
 
-            data = tts.text2audio(response_text)
-            message = _send_voice(message, voice=data)
-            print(message.voice.file_id)
+            bot.send_poll(chat_id, question='ты кто', options=["Олег", 'не Олег'],
+                          is_anonymous=False, type='quiz', correct_option_id=1, open_period=10)
+
+            # print(bot.poll_answer_handlers)
+
+            # data = tts.text2audio(response_text)
+            # message = _send_voice(message, voice=data)
+            # print(message.voice.file_id)
+
+    @bot.poll_answer_handler()
+    def handle_poll_answer(poll_answer: telebot.types.PollAnswer):
+        print(poll_answer)
+        if poll_answer.options_ids[0] == 1:
+            print('верно')
+        else:
+            print('неверно')
 
     @bot.message_handler()
     def send_response(message: telebot.types.Message):  # pylint:disable=unused-variable
