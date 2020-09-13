@@ -45,4 +45,6 @@ class UserInfo:
     age: int = -1
     balance: Balance = 0
     frequency: int = -1
+    chat_id: int = -1
+    quiz_id: int = -1
 

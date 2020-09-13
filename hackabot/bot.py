@@ -11,9 +11,10 @@ from typing import Any, DefaultDict
 import granula
 import telebot
 from telebot import types
+from telebot.apihelper import ApiTelegramException
 
 from hackabot.common.entities import States, UserInfo
-from hackabot.quiz import Quizes
+from hackabot.quiz import *
 from hackabot.storage import BaseStorage, GameStorage
 
 sys.path.append(os.path.abspath("."))
@@ -64,13 +65,13 @@ def _send(message: telebot.types.Message, response: str):
     return bot.send_message(chat_id=message.chat.id, text=response)
 
 
-def _send_voice(message: telebot.types.Message, text):
+def _send_voice(chat_id, text):
     voice = audio_storage.get(text)
 
     if voice is None:
         voice = tts.text2audio(text)
     
-    voice_message = bot.send_voice(chat_id=message.chat.id, voice=voice)
+    voice_message = bot.send_voice(chat_id=chat_id, voice=voice)
     audio_storage.set(text, voice_message.voice.file_id)
     
     return voice_message
@@ -83,18 +84,18 @@ def first_year(message):
     save_user(user)
 
     bot.send_message(message.chat.id, text='*День 1. Назад в 90е.*', parse_mode='Markdown')
-    _send_voice(message, text='Добрый день! На дворе 1994 год')
+    _send_voice(message.chat.id, text='Добрый день! На дворе 1994 год')
     keyboard = telebot.types.InlineKeyboardMarkup()
     keyboard.add(
         telebot.types.InlineKeyboardButton('Купить билеты', callback_data='yes_first'),
         telebot.types.InlineKeyboardButton('Не покупать билеты', callback_data='no_first'))
-    _send_voice(message, text='Олег на связи и я стою перед непростым выбором.')
-    _send_voice(message, text=(
+    _send_voice(message.chat.id, text='Олег на связи и я стою перед непростым выбором.')
+    _send_voice(message.chat.id, text=(
         'Я познакомился с мужчиной, который рассказал мне, как он заработал деньги очень быстро, купив ценные бумаги '
         'одной компании.'))
-    _send_voice(message, text=(
+    _send_voice(message.chat.id, text=(
         'По телевизору везде крутится реклама, однако купить можно только билеты, а не акции компании.'))
-    _send_voice(message, text=(
+    _send_voice(message.chat.id, text=(
         'Все больше и больше людей покупают эти билеты, а доходность каждой невообразимо высокая.'))
     time.sleep(10)
     bot.send_message(message.chat.id, 'Что посоветуешь сделать?', reply_markup=keyboard)
@@ -112,13 +113,39 @@ def balance(message):
 
 @bot.message_handler(commands=['quiz'])
 def balance(message):
+    user = get_user(message.from_user)
+
     quiz_id = random.randint(0, len(Quizes) - 1)
     question, options, correct_option_id = Quizes[quiz_id]
 
-    _send_voice(message, text='Вот тебе квиз от Олега :)')
+    user.chat_id = message.chat.id
+    user.quiz_id = quiz_id
+    save_user(user)
+
+    prompt = QuizPrompts[random.randint(0, len(QuizPrompts) - 1)]
+    _send_voice(message.chat.id, text=prompt)
     bot.send_poll(message.chat.id, question=question, options=options,
                   is_anonymous=False, type='quiz',
                   correct_option_id=correct_option_id, open_period=30)
+
+@bot.poll_answer_handler()
+def handle_poll_answer(poll_answer: telebot.types.PollAnswer):
+    user = get_user(poll_answer.user)
+    quiz_id = user.quiz_id
+    chat_id = user.chat_id
+
+    if 0 <= quiz_id <= len(Quizes) and chat_id != -1:
+        _, _, correct_option_id = Quizes[quiz_id]
+
+        if poll_answer.options_ids[0] == correct_option_id:
+            reply = QuizSuccess[random.randint(0, len(QuizSuccess) - 1)]
+        else:
+            reply = QuizFail[random.randint(0, len(QuizFail) - 1)]
+
+        try:
+            _send_voice(chat_id, text=reply)
+        except ApiTelegramException as e:
+            logger.error(e)
 
 
 @bot.message_handler(commands=['next'])
@@ -129,19 +156,19 @@ def next_year(message):
         save_user(user)
 
         bot.send_message(message.chat.id, text='*День 2. Привет, 2000!*', parse_mode='Markdown')
-        _send_voice(message, text='Приветствую! Это Олег из прошлого, 2000 год.')
+        _send_voice(message.chat.id, text='Приветствую! Это Олег из прошлого, 2000 год.')
         keyboard = telebot.types.InlineKeyboardMarkup()
         keyboard.add(
             telebot.types.InlineKeyboardButton('Первая компания', callback_data='yes_second'),
             telebot.types.InlineKeyboardButton('Вторая компания', callback_data='no_second'))
-        _send_voice(message, text=(
+        _send_voice(message.chat.id, text=(
             'Все большую популярность набирает интернет, а поисковики становятся главным способом информации в интернете.'))
-        _send_voice(message, text=(
+        _send_voice(message.chat.id, text=(
             'Пока не поздно, я решил вложить свои деньги в одну из следующих компаний в этом направлении. '))
-        _send_voice(message, text=(
+        _send_voice(message.chat.id, text=(
             'Первая - известная американская компания, несколько лет на рынке, однако в данный момент испытывает '
             'финансовые трудности в связи с тем что конкуренты ушли вперед и вкладываются в развитие технологий. '))
-        _send_voice(message, text=(
+        _send_voice(message.chat.id, text=(
             'Другая - новая российская компания, занимающаяся русскоязычным аналогом, не имеющая конкурентов на '
             'данный момент.'))
         time.sleep(10)
@@ -151,20 +178,20 @@ def next_year(message):
         save_user(user)
 
         bot.send_message(message.chat.id, text='*День 3. Верните мне мой 2007.*', parse_mode='Markdown')
-        _send_voice(message, text='Добрый день! Это Олег из 2007')
+        _send_voice(message.chat.id, text='Добрый день! Это Олег из 2007')
         keyboard = telebot.types.InlineKeyboardMarkup()
         keyboard.add(
             telebot.types.InlineKeyboardButton('Конечно, нельзя упускать такую возможность.',
                                                callback_data='yes_third'),
             telebot.types.InlineKeyboardButton('Я против.', callback_data='no_third'))
 
-        _send_voice(message, text=(
+        _send_voice(message.chat.id, text=(
             'В мире все большую популярность набирают ПК и интернет, но многие люди не могут себе этого позволить.'))
-        _send_voice(message, text=(
+        _send_voice(message.chat.id, text=(
             'Я решил потратить часть накопленных денег на аренду помещения (500 долларов/месяц)'))
-        _send_voice(message, text=(
+        _send_voice(message.chat.id, text=(
             'И конечно на закупку компьютеров (400 долларов/шт), чтобы дать возможность людям собираться вместе и играть.'))
-        _send_voice(message,
+        _send_voice(message.chat.id,
                     text=(
                         'Я думаю это будет приносить неплохой пассивный доход и очень быстро окупится.'))
 
@@ -175,15 +202,15 @@ def next_year(message):
         save_user(user)
 
         bot.send_message(message.chat.id, text='*День 4. 2010.*', parse_mode='Markdown')
-        _send_voice(message, text='Привет, это снова Олег! 2010 год.')
+        _send_voice(message.chat.id, text='Привет, это снова Олег! 2010 год.')
         keyboard = telebot.types.InlineKeyboardMarkup()
         keyboard.add(
             telebot.types.InlineKeyboardButton('в валюте', callback_data='yes_fourth'),
             telebot.types.InlineKeyboardButton('в рублях', callback_data='no_fourth'))
-        _send_voice(message, text='Я решил открыть кафе в Москве, но у меня нет начального капитала.')
-        _send_voice(message, text=(
+        _send_voice(message.chat.id, text='Я решил открыть кафе в Москве, но у меня нет начального капитала.')
+        _send_voice(message.chat.id, text=(
             'Я решил взять ссуду в банке на достаточно короткий срок. Мне предложили 2 варианта:'))
-        _send_voice(message, text=(
+        _send_voice(message.chat.id, text=(
             'валютный кредит очень маленьким процентом (4%), и кредит в рублях с большим процентом 10%).'))
         time.sleep(5)
         bot.send_message(message.chat.id, 'В какой валюте мне стоит взять кредит?', reply_markup=keyboard)
@@ -192,11 +219,11 @@ def next_year(message):
 def final(message):
     user = get_user(message.chat)
     bot.send_message(message.chat.id, text='*Конец.*', parse_mode='Markdown')
-    _send_voice(message, text=(
+    _send_voice(message.chat.id, text=(
         f'Поздравляем! Вы успешно завершили текущий квест и помогли Олегу '
         f'{"увеличить" if user.balance >= 5000 else "уменьшить"} его капитал.'))
     _send_balance(message, balance=user.balance)
-    _send_voice(message, text=(
+    _send_voice(message.chat.id, text=(
         'Олег ждёт вас на следующем квесте через неделю :)'))
 
 
@@ -209,14 +236,14 @@ def get_investment_first_year(message):  # получаем фамилию
     user.balance -= investment
     save_user(user)
 
-    _send_voice(message, text=(
+    _send_voice(message.chat.id, text=(
         'Описанная выше компания - МММ — крупнейшая в истории России финансовая пирамида. По оценкам экспертов, '
         'от МММ пострадало около 10 миллионов человек, общий ущерб населению составляет 110 млн долларов. Вложенные '
         'Олегом деньги потеряны навсегда :('))
     time.sleep(6)
-    _send_voice(message, text='К сожалению, баланс Олега уменьшился.')
+    _send_voice(message.chat.id, text='К сожалению, баланс Олега уменьшился.')
     time.sleep(8)
-    _send_voice(message, text='Олег надеется, что в следующий раз Вы поможете ему лучше.')
+    _send_voice(message.chat.id, text='Олег надеется, что в следующий раз Вы поможете ему лучше.')
     _send_balance(message, balance=user.balance)
 
     _send(message, response='Для продолжения игры отправьте /next')
@@ -234,7 +261,6 @@ def callback(call):
         _send_voice(call.message, text='Ваш баланс счета опустел :)')
         _send_voice(call.message, text='Попробуйте с самого начала')
         user.balance = 0
-        time.sleep(10)
     elif call.data == "yes_first":
         bot.send_message(call.message.chat.id, 'Какую сумму вложить в акции этой компании?')
         bot.register_next_step_handler(call.message, get_investment_first_year)
@@ -348,9 +374,9 @@ def get_time(message):
     user.frequency = message.text
     save_user(user)
 
-    _send_voice(message, text=(
+    _send_voice(message.chat.id, text=(
         'К сожалению, связь с прошлым — энергозатратный процесс.'))
-    _send_voice(message, text=(
+    _send_voice(message.chat.id, text=(
         'Поэтому, чтобы получить возможность контактировать с Олегом более одного раза в день, нужно проходить квиз '
         'на финансовую грамотность и зарабатывать на электричество для поддержания контакта.'))
     _send(message, response=HELP_MESSAGE)
@@ -377,16 +403,17 @@ def get_text_messages(message):
 
         response_text = "Студенты Сколтеча отправили андроида Олега в прошлое, чтобы он закупил акции успешных " \
                         "компаний и разбогател. "
-        _send_voice(message, text=response_text)
+        _send_voice(message.chat.id, text=response_text)
         time.sleep(2)
         response_text = 'Однако в процессе путешествия во времени он потерял память и не помнит, куда вкладываться. ' \
                         'Всё же он нашел способ связаться с будущим  - это Вы. Он наладил контакт с вашим устройством ' \
                         'и теперь может отправлять вам короткие сообщения. '
-        _send_voice(message, text=response_text)
+        _send_voice(message.chat.id, text=response_text)
         time.sleep(2)
         response_text = 'При себе он имеет начальный капитал в 5000$. Помоги Олегу заработать миллион долларов, ' \
                         'а он в долгу не останется. '
-        _send_voice(message, text=response_text)
+        _send_voice(message.chat.id, text=response_text)
+        time.sleep(8)
         _send_balance(message, balance=user.balance)
         get_help(message)
     elif message.text == "/help":
