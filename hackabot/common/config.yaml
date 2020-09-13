@@ -11,4 +11,5 @@ voice_kit:
   secret_key: ${env VOICEKIT_SECRET_KEY | val null}
 
 storage:
-  path: "storage.db"
+  game: "game.db"
+  audio: "audio.db"

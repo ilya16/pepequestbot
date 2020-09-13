@@ -4,8 +4,8 @@ from hackabot.common.entities import UserInfo
 
 
 class BaseStorage:
-    def __init__(self, config):
-        self._path = config['path']
+    def __init__(self, path):
+        self._path = path
 
     def set(self, key, value):
         with shelve.open(self._path) as storage:
@@ -25,8 +25,8 @@ class BaseStorage:
 
 
 class GameStorage(BaseStorage):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, path):
+        super().__init__(path)
 
     def save_user_info(self, user: UserInfo):
         self.set(key=user.user_id, value=user)
