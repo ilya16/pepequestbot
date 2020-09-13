@@ -25,3 +25,6 @@ You're ready to run bot locally.
 4. Attach to Tmux `tmux attach || tmux new`
 5. Clone your repository.
 5. Repeat local run steps.
+
+## References:
+Original codebase: https://github.com/idenra-google/chackabot
