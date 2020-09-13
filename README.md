@@ -10,8 +10,6 @@
 ## Installation
 1. At first, you need to [create new bot in Telegram](https://core.telegram.org/bots#6-botfather).
 2. Install python and venv
-3. Install [poetry](https://python-poetry.org/docs/#installation)
-4. Install dependencies with `poetry install`
 
 You're ready to run bot locally.
 
